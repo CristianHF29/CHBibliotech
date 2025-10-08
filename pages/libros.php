@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../components/bookcard.php';
+require_once APP_ROOT . '/components/bookcard.php';
 $q = isset($_GET['q']) ? trim($_GET['q']) : null;
 $libros = Books::all($q);
 ?>
