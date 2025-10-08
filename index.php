@@ -1,6 +1,5 @@
 <?php
 define('APP_ROOT', __DIR__);
-
 require APP_ROOT . '/lib/app.php';
 
 $page = $_GET['p'] ?? 'home';
