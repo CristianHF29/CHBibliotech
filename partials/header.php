@@ -33,7 +33,7 @@ $current = $_GET['p'] ?? 'home';
       <?php
       function nav_link($slug, $label) {
         $is = (($_GET['p'] ?? 'home') === $slug);
-        $base='px-3 py-2 rounded-lg text-sm font-semibold transition';
+        $base='px-2 py-2 rounded-lg text-sm font-semibold transition';
         $active='text-white bg-brand hover:bg-brand-dark';
         $idle='text-slate-700 hover:text-brand hover:bg-brand-soft';
         echo '<a class="'.$base.' '.($is?$active:$idle).'" href="index.php?p='.$slug.'">'.$label.'</a>';
