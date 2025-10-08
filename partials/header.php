@@ -25,27 +25,29 @@ $current = $_GET['p'] ?? 'home';
 </head>
 <body class="flex flex-col min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-100 text-slate-800">
   <header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-slate-200">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-      <a href="index.php" class="flex items-center gap-2">
-        <div class="h-9 w-9 grid place-items-center rounded-xl bg-brand text-white font-bold">B</div>
-        <span class="font-bold text-lg">Bibliotech</span>
-      </a>
-      <?php
-      function nav_link($slug, $label) {
-        $is = (($_GET['p'] ?? 'home') === $slug);
-        $base='px-2 py-2 rounded-lg text-sm font-semibold transition';
-        $active='text-white bg-brand hover:bg-brand-dark';
-        $idle='text-slate-700 hover:text-brand hover:bg-brand-soft';
-        echo '<a class="'.$base.' '.($is?$active:$idle).'" href="index.php?p='.$slug.'">'.$label.'</a>';
-      } ?>
-      <nav class="flex gap-2">
-        <?php nav_link('home','Inicio'); ?>
-        <?php nav_link('libros','Libros'); ?>
-        <?php nav_link('agregar','Agregar'); ?>
-        <?php nav_link('prestamos','Préstamos'); ?>
-      </nav>
-    </div>
-  </header>
+  <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between flex-wrap">
+    <a href="index.php" class="flex items-center gap-2">
+      <div class="h-9 w-9 grid place-items-center rounded-xl bg-brand text-white font-bold">B</div>
+      <span class="font-bold text-lg">Bibliotech</span>
+    </a>
+
+    <?php
+    function nav_link($slug, $label) {
+      $is = (($_GET['p'] ?? 'home') === $slug);
+      $base='px-2 py-2 rounded-lg text-sm font-semibold transition';
+      $active='text-white bg-brand hover:bg-brand-dark';
+      $idle='text-slate-700 hover:text-brand hover:bg-brand-soft';
+      echo '<a class="'.$base.' '.($is?$active:$idle).'" href="index.php?p='.$slug.'">'.$label.'</a>';
+    } ?>
+
+    <nav class="flex gap-2 w-full sm:w-auto mt-3 sm:mt-0">
+      <?php nav_link('home','Inicio'); ?>
+      <?php nav_link('libros','Libros'); ?>
+      <?php nav_link('agregar','Agregar'); ?>
+      <?php nav_link('prestamos','Préstamos'); ?>
+    </nav>
+  </div>
+</header>
 
   <main class="flex-1 max-w-6xl mx-auto px-4 py-8">
     <?php if (!empty($flash_error)): ?>
