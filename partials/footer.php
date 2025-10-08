@@ -2,7 +2,7 @@
   <footer class="border-t border-slate-200 py-6">
     <div class="max-w-6xl mx-auto px-4 flex items-center justify-between text-sm text-slate-600">
       <p>© <?= date('Y') ?> Bibliotech by Cristian Hernandez</p>
-      <p>Hecho con <span class="text-brand">♥</span>PHP + Tailwind CSS</p>
+      <p>Hecho con PHP + Tailwind CSS</p>
     </div>
   </footer>
 
