@@ -1,5 +1,7 @@
 <?php
-require __DIR__ . '/lib/app.php';
+define('APP_ROOT', __DIR__);
+
+require APP_ROOT . '/lib/app.php';
 
 $page = $_GET['p'] ?? 'home';
 $allowed = ['home','libros','agregar','prestamos'];
@@ -29,6 +31,6 @@ try {
   $flash_error = $e->getMessage();
 }
 
-require __DIR__ . '/partials/header.php';
-require __DIR__ . "/pages/{$page}.php";
-require __DIR__ . '/partials/footer.php';
+require APP_ROOT . '/partials/header.php';
+require APP_ROOT . "/pages/{$page}.php";
+require APP_ROOT . '/partials/footer.php';
