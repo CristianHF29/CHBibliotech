@@ -1,5 +1,5 @@
 <?php
-require_once APP_ROOT . '/components/BookCard.php';
+require_once APP_ROOT . '/components/bookcard.php';
 $s = Books::stats();
 $todos = Books::all();
 $novedades = array_slice($todos, 0, 6);
