@@ -1,5 +1,8 @@
 <?php
-require_once APP_ROOT . '/components/bookcard.php';
+$__c1 = APP_ROOT . '/components/bookcard.php';
+$__c2 = __DIR__ . '/../components/bookcard.php';
+require_once (file_exists($__c1) ? $__c1 : $__c2);
+
 $s = Books::stats();
 $todos = Books::all();
 $novedades = array_slice($todos, 0, 6);

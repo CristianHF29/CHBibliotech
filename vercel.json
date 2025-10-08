@@ -2,10 +2,10 @@
   "functions": {
     "api/index.php": {
       "runtime": "vercel-php@0.7.4",
-      "includeFiles": "**"
+      "includeFiles": "{components,partials,pages,lib}/**"
     }
   },
-  "routes": [{ "src": "/(.*)", "dest": "api/index.php" }]
+  "routes": [
+    { "src": "/(.*)", "dest": "api/index.php" }
+  ]
 }
-
-
