@@ -28,15 +28,32 @@ $prefillBook = isset($_GET['book_id']) ? (int)$_GET['book_id'] : null;
     </div>
 
     <div class="grid grid-cols-2 gap-3 md:col-span-4">
-      <div>
-        <label class="block text-sm font-medium text-slate-700 mb-1">Fecha salida</label>
-        <input type="date" name="out_date" required value="<?= date('Y-m-d') ?>" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand">
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-slate-700 mb-1">Fecha devolución</label>
-        <input type="date" name="due_date" required value="<?= date('Y-m-d', strtotime('+14 days')) ?>" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand">
-      </div>
-    </div>
+  <div>
+    <label class="block text-sm font-medium text-slate-700 mb-1">Fecha salida</label>
+    <input
+      type="date"
+      id="out_date"
+      name="out_date"
+      required
+      value="<?= date('Y-m-d') ?>"
+      min="<?= date('Y-m-d') ?>"
+      class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand"
+    >
+  </div>
+  <div>
+    <label class="block text-sm font-medium text-slate-700 mb-1">Fecha devolución</label>
+    <input
+      type="date"
+      id="due_date"
+      name="due_date"
+      required
+      value="<?= date('Y-m-d', strtotime('+14 days')) ?>"
+      min="<?= date('Y-m-d') ?>"
+      max="<?= date('Y-m-d', strtotime('+30 days')) ?>"
+      class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand"
+    >
+  </div>
+</div>
 
     <div class="md:col-span-4">
       <button class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-brand hover:bg-brand-dark text-white font-semibold">Registrar préstamo</button>
@@ -125,4 +142,39 @@ $prefillBook = isset($_GET['book_id']) ? (int)$_GET['book_id'] : null;
   </div>
 
 <?php endif; ?>
+
+<script>
+  (function () {
+    const out = document.getElementById('out_date');
+    const due = document.getElementById('due_date');
+
+    function fmt(d){ return d.toISOString().slice(0,10); }
+    function addDays(date, days){
+      const d = new Date(date);
+      d.setDate(d.getDate() + days);
+      return d;
+    }
+
+    function clampDue() {
+      if (!out.value) return;
+      const start = new Date(out.value + 'T00:00:00');
+      const min = start;                 // no antes que salida
+      const max = addDays(start, 30);    // máximo 30 días
+
+      due.min = fmt(min);
+      due.max = fmt(max);
+
+      if (!due.value || new Date(due.value) < min) {
+        due.value = fmt(min);
+      } else if (new Date(due.value) > max) {
+        due.value = fmt(max);
+      }
+    }
+
+    // inicial
+    clampDue();
+    // cuando cambie la fecha de salida
+    out.addEventListener('change', clampDue);
+  })();
+</script>
 

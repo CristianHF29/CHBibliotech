@@ -6,6 +6,13 @@ if (!function_exists('str_contains')) {
   function str_contains($haystack, $needle) { return $needle === '' || strpos($haystack, $needle) !== false; }
 }
 
+function _norm(string $s): string {
+  $s = trim(mb_strtolower($s, 'UTF-8'));
+  $t = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $s);
+  if ($t !== false) $s = $t;
+  return preg_replace('/[^a-z0-9]+/', '', $s);
+}
+
 interface Searchable {
   public function matches(string $q): bool;
 }
@@ -221,8 +228,8 @@ if (!isset($_SESSION['books'])) {
       'year'=>2008,
       'description'=>'Una competencia mortal en un futuro distópico donde solo uno puede sobrevivir.',
       'image_url'=>'https://covers.openlibrary.org/b/isbn/9780439023528-L.jpg',
-      'copies_total'=>10,
-      'copies_available'=>10,
+      'copies_total'=>6,
+      'copies_available'=>6,
       'available'=>1
     ],
     [
@@ -233,8 +240,8 @@ if (!isset($_SESSION['books'])) {
       'year'=>1997,
       'description'=>'El inicio de la saga del joven mago que cambió el mundo literario.',
       'image_url'=>'https://covers.openlibrary.org/b/isbn/9780747532699-L.jpg',
-      'copies_total'=>6,
-      'copies_available'=>6,
+      'copies_total'=>2,
+      'copies_available'=>2,
       'available'=>1
     ],
   ];
@@ -286,12 +293,28 @@ class Books {
   }
 
   public static function create(array $d): int {
+    $title  = trim((string)$d['title']);
+    $author = trim((string)$d['author']);
+    $add    = isset($d['copies_total']) && $d['copies_total'] !== '' ? max(1, (int)$d['copies_total']) : 1;
+
+    foreach ($_SESSION['books'] as &$r) {
+      if (_norm($r['title'] ?? '') === _norm($title) && _norm($r['author'] ?? '') === _norm($author)) {
+        $r['copies_total']     = (int)($r['copies_total'] ?? 0) + $add;
+        $r['copies_available'] = (int)($r['copies_available'] ?? 0) + $add;
+        if ($r['copies_available'] > $r['copies_total']) $r['copies_available'] = $r['copies_total'];
+        $id = (int)$r['id'];
+        unset($r);
+        return $id;
+      }
+    }
+    unset($r);
+
     $id = $_SESSION['next_book_id']++;
-    $total = isset($d['copies_total']) && $d['copies_total'] !== '' ? max(0,(int)$d['copies_total']) : 1;
+    $total = $add;
     $book = new Book(
       id:$id,
-      title:trim($d['title']),
-      author:trim($d['author']),
+      title:$title,
+      author:$author,
       category:$d['category'] ?? null,
       year:($d['year']!=='') ? (int)$d['year'] : null,
       description:$d['description'] ?? null,
@@ -355,7 +378,7 @@ class Books {
   public static function stats(): array {
     $all = self::all();
     $total = count($all);
-    $available = count(array_filter($all, fn($r)=> (int)($r['copies_available'] ?? 0) > 0));
+    $available = array_sum(array_map(fn($r)=> (int)($r['copies_available'] ?? 0), $all));
     $loans = count(array_filter($_SESSION['loans'], fn($l)=> ($l['status'] ?? '') === 'En curso'));
     return compact('total','available','loans');
   }
@@ -376,10 +399,31 @@ class Loans {
 
   public static function create(int $book_id, string $user, string $out_date, string $due_date): int {
     $book = Books::find($book_id);
-    if (!$book || (int)($book['copies_available'] ?? 0) <= 0) throw new Exception('Libro no disponible.');
+    if (!$book || (int)($book['copies_available'] ?? 0) <= 0) {
+      throw new Exception('Libro no disponible.');
+    }
+
+    $out = DateTime::createFromFormat('Y-m-d', $out_date);
+    $due = DateTime::createFromFormat('Y-m-d', $due_date);
+    if (!$out || !$due) {
+      throw new Exception('Fechas inválidas.');
+    }
+    // normaliza a medianoche
+    $out->setTime(0,0,0);
+    $due->setTime(0,0,0);
+
+    if ($due < $out) {
+      throw new Exception('La devolución no puede ser antes de la salida.');
+    }
+
+    // máximo 30 días (1 mes)
+    $diffDays = (int)$out->diff($due)->format('%a');
+    if ($diffDays > 30) {
+      throw new Exception('El préstamo no puede exceder 30 días.');
+    }
 
     $id = $_SESSION['next_loan_id']++;
-    $loan = new Loan($id, $book_id, $user, $out_date, $due_date, 'En curso');
+    $loan = new Loan($id, $book_id, trim($user), $out->format('Y-m-d'), $due->format('Y-m-d'), 'En curso');
     $_SESSION['loans'][] = $loan->toArray();
     Books::adjustCopiesAvailable($book_id, -1);
     return $id;
